@@ -4,7 +4,6 @@ import copy
 
 SELECTED_START = pygame.image.load(os.path.abspath('imgs/selected_orign.png'))
 OBJECTIVE = pygame.image.load(os.path.abspath('imgs/objective.png'))
-ATTACK = pygame.image.load(os.path.abspath('imgs/attack.png'))
 
 class Board:
     def __init__(self):
@@ -136,8 +135,6 @@ class Spot:
     def draw_piece(self, screen):
         if self.selected_start:
             screen.blit(SELECTED_START, (self.x * 50, self.y * 50))
-        if self.piece.threatened:
-            screen.blit(ATTACK, (self.x * 50, self.y * 50))
         if self.selected_end:
             screen.blit(OBJECTIVE, (self.x * 50, self.y * 50))
         if self.piece.is_white != None:
