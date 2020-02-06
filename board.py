@@ -106,7 +106,7 @@ class Board:
             Spot(4, 3, Blank()), Spot(5, 3, Blank()), Spot(6, 3, Blank()), Spot(7, 3, Blank())],
             [Spot(0, 4, Blank()), Spot(1, 4, Blank()), Spot(2, 4, Blank()), Spot(3, 4, Blank()),
             Spot(4, 4, Blank()), Spot(5, 4, Blank()), Spot(6, 4, Blank()), Spot(7, 4, Blank())],
-            [Spot(0, 5, Blank()), Spot(1, 5, Pawn(False)), Spot(2, 5, Blank()), Spot(3, 5, Blank()),
+            [Spot(0, 5, Blank()), Spot(1, 5, Blank()), Spot(2, 5, Blank()), Spot(3, 5, Blank()),
             Spot(4, 5, Blank()), Spot(5, 5, Blank()), Spot(6, 5, Blank()), Spot(7, 5, Blank())],
             [Spot(0, 6, Pawn(True)), Spot(1, 6, Pawn(True)), Spot(2, 6, Pawn(True)), Spot(3, 6, Pawn(True)), 
             Spot(4, 6, Pawn(True)), Spot(5, 6, Pawn(True)), Spot(6, 6, Pawn(True)), Spot(7, 6, Pawn(True))],
