@@ -56,14 +56,14 @@ def check_mate(board, move, white_turn):
     all_moves = board.get_moves(not white_turn)
     for move in all_moves:
         if "king" in move[1].piece.name:
+            board.make_move((end, start), cpy_end.piece) 
             board.compute_moves(white_turn)
             all_moves = board.get_moves(white_turn)
-            board.make_move((end, start), cpy_end.piece)
             return True
     #reset board
+    board.make_move((end, start), cpy_end.piece)
     board.compute_moves(white_turn)
     all_moves = board.get_moves(white_turn)
-    board.make_move((end, start), cpy_end.piece)
     return False
 
 
@@ -73,7 +73,6 @@ def game_loop(screen, white_turn):
     aux_board = Board()
     #LOCAL VARIABLES
     running = True
-
     start = None
     end = None
     #COMPUTE POSIBLE MOVES
