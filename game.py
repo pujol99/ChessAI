@@ -45,12 +45,7 @@ def select_start(board, i, j, white_turn):
         return start
     return None
 
-def check_mate(moves):
-    for move in moves:
-        ix, iy = move[0].get_pos()
-        x, y = move[1].get_pos()
-        print(move[0].piece.name + ' (' + str(ix) + ', ' + str(iy) + ') --> ' + move[1].piece.name + ' (' + str(x) + ', ' + str(y) + ')')
-    print('-----------------')
+def check_win()
 
 def game_loop(screen, white_turn):
     board = Board()
@@ -81,7 +76,9 @@ def game_loop(screen, white_turn):
                     end = board.spots[j][i]
                     start.reset_drag()
                     if end.selected_end:
+                        #cpy_end = copy.copy(end)
                         board.make_move((start, end))
+                        #board.make_move((end, start), cpy_end.piece)
                         white_turn = not white_turn
                         board.compute_moves(white_turn)
                         all_moves = board.get_moves(white_turn)
