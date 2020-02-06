@@ -18,16 +18,35 @@ class Board:
         return self.spots[y][x]
     
     def get_whites(self):
+        self.whites.clear()
         for row in self.spots:
             for spot in row:
                 if spot.piece.is_white == True:
                     self.whites.append(spot)
 
     def get_blacks(self):
+        self.blacks.clear()
         for row in self.spots:
             for spot in row:
                 if spot.piece.is_white == False:
                     self.blacks.append(spot)
+
+    def check_mate(self, next_moves, white_turn):
+        """
+            will prevent of u exposing your king to death
+        """
+        start, end = move[0], move[1]
+        cpy_end = copy.copy(end)
+        self.make_move((start, end))
+        self.compute_moves(not white_turn)
+        next_moves = self.get_moves(not white_turn)
+        for move in next_moves:
+            if "king" in move[1].piece.name:
+                self.make_move((end, start), cpy_end.piece) 
+                return True
+        #reset board
+        self.make_move((end, start), cpy_end.piece)
+        return False
 
     def compute_moves(self, whites):
         if whites:

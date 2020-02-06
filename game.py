@@ -45,28 +45,6 @@ def select_start(board, i, j, white_turn):
         return start
     return None
 
-def check_mate(board, move, white_turn):
-    """
-        will prevent of u exposing your king to death
-    """
-    start, end = move[0], move[1]
-    cpy_end = copy.copy(end)
-    board.make_move((start, end))
-    board.compute_moves(not white_turn)
-    all_moves = board.get_moves(not white_turn)
-    for move in all_moves:
-        if "king" in move[1].piece.name:
-            board.make_move((end, start), cpy_end.piece) 
-            board.compute_moves(white_turn)
-            all_moves = board.get_moves(white_turn)
-            return True
-    #reset board
-    board.make_move((end, start), cpy_end.piece)
-    board.compute_moves(white_turn)
-    all_moves = board.get_moves(white_turn)
-    return False
-
-
 
 def game_loop(screen, white_turn):
     board = Board()
@@ -77,7 +55,7 @@ def game_loop(screen, white_turn):
     end = None
     #COMPUTE POSIBLE MOVES
     board.compute_moves(white_turn)
-    all_moves = board.get_moves(white_turn)
+    current_moves = board.get_moves(white_turn)
     #LOOP
     while running:
         #PROCESS EVENTS
@@ -96,11 +74,11 @@ def game_loop(screen, white_turn):
                     end = board.spots[j][i]
                     start.reset_drag()
                     if end.selected_end:
-                        if not check_mate(board, (start, end), white_turn):
-                            board.make_move((start, end))
-                            white_turn = not white_turn
-                            board.compute_moves(white_turn)
-                            all_moves = board.get_moves(white_turn)
+                        board.make_move((start, end))
+                        white_turn = not white_turn
+                        board.compute_moves(white_turn)
+                        current_moves = board.get_moves(white_turn)
+                        prev_moves = board.get_moves(not white_turn)
                     start = None
                     board.unselect_pieces()
 
