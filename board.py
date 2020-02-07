@@ -131,13 +131,6 @@ class Board:
         self.get_blacks()
         self.get_whites()
 
-    def print_board(self):
-        for row in self.spots:
-            for spot in row:
-                print(spot.piece.name, end=' ')
-            print('')
-        print('-------------------------------')
-
     def reset_board(self):
         spots = [
             [Spot(0, 0, Rook(False)), Spot(1, 0, Knight(False)), Spot(2, 0, Bishop(False)), Spot(3, 0, Queen(False)), 
