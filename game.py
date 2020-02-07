@@ -36,19 +36,18 @@ def text(screen, size, text, bg, fg, cx, cy):
 	textRect.center = (cx, cy)
 	screen.blit(text, textRect)
 
-def select_start(board, i, j, white_turn):
+def select_start(board, i, j, clean_moves, white_turn):
     if board.spots[j][i].piece.is_white == white_turn:
         start = board.spots[j][i]
         start.dragging = True
         start.selected_start = True
-        board.select_objectives(start)
+        board.select_objectives(clean_moves, start)
         return start
     return None
 
 
 def game_loop(screen, white_turn):
     board = Board()
-    aux_board = Board()
     #LOCAL VARIABLES
     running = True
     start = None
@@ -66,19 +65,20 @@ def game_loop(screen, white_turn):
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     i, j = get_index_click()
-                    start = select_start(board, i, j, white_turn)
+                    start = select_start(board, i, j, current_moves, white_turn)
 
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1 and start:
                     i, j = get_index_click()
                     end = board.spots[j][i]
                     start.reset_drag()
-                    if end.selected_end:
+                    if (start, end) in current_moves:
                         board.make_move((start, end))
                         white_turn = not white_turn
                         board.compute_moves(white_turn)
-                        current_moves = board.get_moves(white_turn)
-                        prev_moves = board.get_moves(not white_turn)
+                        current_moves = board.clean_moves(board.get_moves(white_turn), white_turn)
+                        if len(current_moves) == 0:
+                            running = False
                     start = None
                     board.unselect_pieces()
 

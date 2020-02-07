@@ -76,15 +76,40 @@ class Board:
                 for move in black.piece.positions:
                     moves.append(move)
         return moves
+    
+    def clean_moves(self, moves, white_turn):
+        clean_moves = []
+        for move in moves:
+            if not self.check_mate(move, white_turn):
+                clean_moves.append(move)
+        return clean_moves
+
+    def check_mate(self, move, white_turn):
+        """
+            will prevent of u exposing your king to death
+        """
+        start, end = move[0], move[1]
+        cpy_end = copy.copy(end)
+        self.make_move((start, end))
+        self.compute_moves(not white_turn)
+        all_moves = self.get_moves(not white_turn)
+        for move in all_moves:
+            if "king" in move[1].piece.name:
+                self.make_move((end, start), cpy_end.piece)
+                return True
+        #reset board
+        self.make_move((end, start), cpy_end.piece)
+        return False
                 
     def draw_pieces(self, screen):
         for row in self.spots:
             for spot in row:
                 spot.draw_piece(screen)
     
-    def select_objectives(self, position):
+    def select_objectives(self, clean_moves, position):
         for spot in position.piece.positions:
-            spot[1].selected_end = True
+            if spot in clean_moves:
+                spot[1].selected_end = True
 
     def unselect_pieces(self):
         for row in self.spots:
@@ -105,7 +130,7 @@ class Board:
 
         self.get_blacks()
         self.get_whites()
-    
+
     def print_board(self):
         for row in self.spots:
             for spot in row:
