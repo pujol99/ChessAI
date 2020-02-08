@@ -170,7 +170,45 @@ class King(Piece):
                 if self.inside_board(x, y):
                     if spots[y][x].piece.is_white != self.is_white:
                         self.positions.append((start, spots[y][x]))
-  
+        if self.is_white:
+                h = 7
+        else:
+                h = 0
+        self.check_castling_short(spots, start, h)
+        self.check_castling_long(spots, start, h)
+    
+    def check_castling_short(self, spots, start, h):
+        if not self.has_moved and not self.threatened:
+            if spots[h][5].piece.is_white != None:
+                return
+            if spots[h][5].piece.threatened == True:
+                return
+            if spots[h][6].piece.is_white != None:
+                return
+            if spots[h][6].piece.threatened == True:
+                return
+            if spots[h][7].piece.has_moved == False:
+                if spots[h][7].piece.threatened == False:
+                    self.positions.append((start, spots[h][6]))
+        
+    def check_castling_long(self, spots, start, h):
+        if not self.has_moved and not self.threatened:
+            if spots[h][3].piece.is_white != None:
+                return
+            if spots[h][3].piece.threatened == True:
+                return
+            if spots[h][2].piece.is_white != None:
+                return
+            if spots[h][2].piece.threatened == True:
+                return
+            if spots[h][1].piece.is_white != None:
+                return
+            if spots[h][1].piece.threatened == True:
+                return
+            if spots[h][0].piece.has_moved == False:
+                if spots[h][0].piece.threatened == False:
+                    self.positions.append((start, spots[h][2]))
+
     def get_img(self):
         if self.is_white:
             return WHITE_KING
@@ -186,11 +224,9 @@ class Pawn(Piece):
         self.positions.clear()
         if self.is_white:
             direction = -1
-            jump = 6
         else:
             direction = 1
-            jump = 1
-        if start.y == jump:
+        if not self.has_moved:
             if spots[start.y + direction * 2][start.x].piece.is_white == None:
                 if spots[start.y + direction][start.x].piece.is_white == None:
                     self.positions.append((start, spots[start.y + direction * 2][start.x]))

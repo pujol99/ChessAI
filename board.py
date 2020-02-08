@@ -111,14 +111,13 @@ class Board:
             for spot in row:
                 spot.selected_start = False
                 spot.selected_end = False
-            
 
-    def make_move(self, move, prev=None, test=False):
-        start, end = move[0], move[1]   
+    def make_move(self, move, prev=None, virtual=False):
+        start, end = move[0], move[1]
+
         end.piece = copy.copy(start.piece)
-        if not test:
+        if not virtual:
             end.piece.has_moved = True
-            
         if prev:
             start.piece = prev
         else:
