@@ -4,6 +4,7 @@ import copy
 
 SELECTED_START = pygame.image.load(os.path.abspath('imgs/selected_orign.png'))
 OBJECTIVE = pygame.image.load(os.path.abspath('imgs/objective.png'))
+ATTACK = pygame.image.load(os.path.abspath('imgs/attack.png'))
 
 class Board:
     def __init__(self):
@@ -85,15 +86,15 @@ class Board:
         """
         start, end = move[0], move[1]
         cpy_end = copy.copy(end)
-        self.make_move((start, end), None, True)
+        had_moved = self.make_move((start, end))
         self.compute_moves(not white_turn)
         all_moves = self.get_moves(not white_turn)
         for move in all_moves:
             if "king" in move[1].piece.name:
-                self.make_move((end, start), cpy_end.piece, True)
+                self.unmake_move((end, start), cpy_end.piece, had_moved)
                 return True
         #reset board
-        self.make_move((end, start), cpy_end.piece, True)
+        self.unmake_move((end, start), cpy_end.piece, had_moved)
         return False
                 
     def draw_pieces(self, screen):
@@ -112,19 +113,30 @@ class Board:
                 spot.selected_start = False
                 spot.selected_end = False
 
-    def make_move(self, move, prev=None, virtual=False):
+    def unmake_move(self, move, prev, had_moved):
         start, end = move[0], move[1]
 
         end.piece = copy.copy(start.piece)
-        if not virtual:
-            end.piece.has_moved = True
-        if prev:
-            start.piece = prev
-        else:
-            start.piece = Blank()
+
+        end.piece.has_moved = had_moved
+        start.piece = prev
         
         self.get_blacks()
         self.get_whites()
+
+
+    def make_move(self, move):
+        start, end = move[0], move[1]
+
+        end.piece = copy.copy(start.piece)
+        had_moved = end.piece.has_moved
+
+        end.piece.has_moved = True
+        start.piece = Blank()
+        
+        self.get_blacks()
+        self.get_whites()
+        return had_moved
 
     def reset_board(self):
         spots = [
