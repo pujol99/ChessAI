@@ -54,7 +54,7 @@ def game_loop(screen, white_turn):
     end = None
     #COMPUTE POSIBLE MOVES
     board.compute_moves(white_turn)
-    current_moves = board.get_moves(white_turn)
+    current_moves = board.clean_moves(board.get_moves(white_turn), white_turn)
     #LOOP
     while running:
         #PROCESS EVENTS
@@ -74,6 +74,7 @@ def game_loop(screen, white_turn):
                     start.reset_drag()
                     if (start, end) in current_moves:
                         board.make_move((start, end))
+                        board.compute_threads(white_turn)
                         white_turn = not white_turn
                         board.compute_moves(white_turn)
                         current_moves = board.clean_moves(board.get_moves(white_turn), white_turn)

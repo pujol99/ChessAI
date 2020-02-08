@@ -20,6 +20,7 @@ class Piece:
         self.has_moved = False
         self.threatened = False 
         self.name = None
+        self.test = False
     
     def positions_can_move(self, spots, start):
         pass

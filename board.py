@@ -31,23 +31,6 @@ class Board:
                 if spot.piece.is_white == False:
                     self.blacks.append(spot)
 
-    def check_mate(self, next_moves, white_turn):
-        """
-            will prevent of u exposing your king to death
-        """
-        start, end = move[0], move[1]
-        cpy_end = copy.copy(end)
-        self.make_move((start, end))
-        self.compute_moves(not white_turn)
-        next_moves = self.get_moves(not white_turn)
-        for move in next_moves:
-            if "king" in move[1].piece.name:
-                self.make_move((end, start), cpy_end.piece) 
-                return True
-        #reset board
-        self.make_move((end, start), cpy_end.piece)
-        return False
-
     def compute_moves(self, whites):
         if whites:
             for white in self.whites:
@@ -84,21 +67,33 @@ class Board:
                 clean_moves.append(move)
         return clean_moves
 
+    def cancel_threads(self):
+        for row in self.spots:
+            for spot in row:
+                spot.piece.threatened = False
+
+    def compute_threads(self, white_turn):
+        self.cancel_threads()
+        self.compute_moves(white_turn)
+        moves = self.get_moves(white_turn)
+        for move in moves:
+            move[1].piece.threatened = True
+
     def check_mate(self, move, white_turn):
         """
             will prevent of u exposing your king to death
         """
         start, end = move[0], move[1]
         cpy_end = copy.copy(end)
-        self.make_move((start, end))
+        self.make_move((start, end), None, True)
         self.compute_moves(not white_turn)
         all_moves = self.get_moves(not white_turn)
         for move in all_moves:
             if "king" in move[1].piece.name:
-                self.make_move((end, start), cpy_end.piece)
+                self.make_move((end, start), cpy_end.piece, True)
                 return True
         #reset board
-        self.make_move((end, start), cpy_end.piece)
+        self.make_move((end, start), cpy_end.piece, True)
         return False
                 
     def draw_pieces(self, screen):
@@ -118,16 +113,17 @@ class Board:
                 spot.selected_end = False
             
 
-    def make_move(self, move, prev=None):
+    def make_move(self, move, prev=None, test=False):
         start, end = move[0], move[1]   
-
         end.piece = copy.copy(start.piece)
-        end.piece.has_moved = True
+        if not test:
+            end.piece.has_moved = True
+            
         if prev:
             start.piece = prev
         else:
             start.piece = Blank()
-
+        
         self.get_blacks()
         self.get_whites()
 
