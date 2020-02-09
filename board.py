@@ -86,15 +86,15 @@ class Board:
         """
         start, end = move[0], move[1]
         cpy_end = copy.copy(end)
-        had_moved, had_castled = self.make_move((start, end))
+        had_moved, had_castled, had_transformed = self.make_move((start, end))
         self.compute_moves(not white_turn)
         all_moves = self.get_moves(not white_turn)
         for move in all_moves:
             if "king" in move[1].piece.name:
-                self.unmake_move((end, start), cpy_end.piece, had_moved, had_castled)
+                self.unmake_move((end, start), cpy_end.piece, had_moved, had_castled, had_transformed)
                 return True
         #reset board
-        self.unmake_move((end, start), cpy_end.piece, had_moved, had_castled)
+        self.unmake_move((end, start), cpy_end.piece, had_moved, had_castled, had_transformed)
         return False
                 
     def draw_pieces(self, screen):
@@ -112,23 +112,25 @@ class Board:
             for spot in row:
                 spot.selected_start = False
                 spot.selected_end = False
+    
 
-    def unmake_move(self, move, prev, had_moved, had_castled):
+    def unmake_move(self, move, prev, had_moved, had_castled, had_transformed):
         start, end = move[0], move[1]
         if had_castled:
             if start.piece.is_white:
-                    h = 7
+                h = 7
             else:
                 h = 0
             if start.x - end.x < 0:
-                self.unmake_move((self.spots[h][3], self.spots[h][0]), Blank(), False, False)
+                self.unmake_move((self.spots[h][3], self.spots[h][0]), Blank(), False, False, False)
             else:
-                self.unmake_move((self.spots[h][5], self.spots[h][7]), Blank(), False, False)
+                self.unmake_move((self.spots[h][5], self.spots[h][7]), Blank(), False, False, False)
         end.piece = copy.copy(start.piece)
-
+        if had_transformed:
+            end.piece = Pawn(start.piece.is_white)
         end.piece.has_moved = had_moved
+
         start.piece = prev
-        
         self.get_blacks()
         self.get_whites()
 
@@ -136,6 +138,7 @@ class Board:
     def make_move(self, move):
         start, end = move[0], move[1]
         had_castled = False
+        had_transformed = False
         if "king" in start.piece.name:
             if abs(start.x - end.x) > 1:
                 had_castled = True
@@ -147,16 +150,19 @@ class Board:
                     self.make_move((self.spots[h][0], self.spots[h][3]))
                 else:
                     self.make_move((self.spots[h][7], self.spots[h][5]))
-
         end.piece = copy.copy(start.piece)
         had_moved = end.piece.has_moved
+        
+        end.piece.has_moved = True         
+        if "pawn" in start.piece.name and (end.y == 7 or end.y == 0):
+            end.piece = Queen(start.piece.is_white)
+            had_transformed = True
 
-        end.piece.has_moved = True
         start.piece = Blank()
         
         self.get_blacks()
         self.get_whites()
-        return had_moved, had_castled
+        return had_moved, had_castled, had_transformed
 
     def reset_board(self):
         spots = [
@@ -200,8 +206,6 @@ class Spot:
         return self.x, self.y
 
     def draw_piece(self, screen):
-        if self.piece.has_moved:
-            screen.blit(ATTACK, (self.x * 50, self.y * 50))
         if self.selected_start:
             screen.blit(SELECTED_START, (self.x * 50, self.y * 50))
         if self.selected_end:

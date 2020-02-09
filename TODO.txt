@@ -1,2 +1,1 @@
-enrocar
-pawn -> queen, horse
+jump kill borders

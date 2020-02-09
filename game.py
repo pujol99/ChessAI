@@ -58,37 +58,47 @@ def game_loop(screen, white_turn):
     #LOOP
     while running:
         #PROCESS EVENTS
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+        if white_turn:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        i, j = get_index_click()
+                        start = select_start(board, i, j, current_moves, white_turn)
+
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    if event.button == 1 and start:
+                        i, j = get_index_click()
+                        end = board.spots[j][i]
+                        start.reset_drag()
+                        if (start, end) in current_moves:
+                            board.make_move((start, end))
+                            board.compute_threads(white_turn)
+                            white_turn = not white_turn
+                            board.compute_moves(white_turn)
+                            current_moves = board.clean_moves(board.get_moves(white_turn), white_turn)
+                            if len(current_moves) == 0:
+                                running = False
+                        start = None
+                        board.unselect_pieces()
+
+                elif event.type == pygame.MOUSEMOTION:
+                    if start:
+                        xC, yC = pygame.mouse.get_pos()
+                        start.imgX = xC - 25
+                        start.imgY = yC - 25
+        else:
+            move = choice(current_moves)
+            board.make_move(move)
+            board.compute_threads(white_turn)
+            white_turn = not white_turn
+            board.compute_moves(white_turn)
+            current_moves = board.clean_moves(board.get_moves(white_turn), white_turn)
+            if len(current_moves) == 0:
                 running = False
 
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    i, j = get_index_click()
-                    start = select_start(board, i, j, current_moves, white_turn)
-
-            elif event.type == pygame.MOUSEBUTTONUP:
-                if event.button == 1 and start:
-                    i, j = get_index_click()
-                    end = board.spots[j][i]
-                    start.reset_drag()
-                    if (start, end) in current_moves:
-                        board.make_move((start, end))
-                        board.compute_threads(white_turn)
-                        white_turn = not white_turn
-                        board.compute_moves(white_turn)
-                        current_moves = board.clean_moves(board.get_moves(white_turn), white_turn)
-                        if len(current_moves) == 0:
-                            running = False
-                    start = None
-                    board.unselect_pieces()
-
-            elif event.type == pygame.MOUSEMOTION:
-                if start:
-                    xC, yC = pygame.mouse.get_pos()
-                    start.imgX = xC - 25
-                    start.imgY = yC - 25
-      
         #UPDATE VALUES AND CONDITIONS
 
         #DRAW

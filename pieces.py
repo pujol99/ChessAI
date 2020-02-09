@@ -19,8 +19,8 @@ class Piece:
         self.is_white = white
         self.has_moved = False
         self.threatened = False 
+        self.has_jumped = False
         self.name = None
-        self.test = False
     
     def positions_can_move(self, spots, start):
         pass
@@ -239,6 +239,7 @@ class Pawn(Piece):
             if start.x - 1 >= 0:
                 if spots[start.y + direction][start.x - 1].piece.is_white == (not self.is_white):
                     self.positions.append((start, spots[start.y + direction][start.x - 1]))
+
             
     def get_img(self):
         if self.is_white:
