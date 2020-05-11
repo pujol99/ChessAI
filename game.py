@@ -1,114 +1,108 @@
 import pygame
-import os
-import copy
-import time
-from random import choice
-from board import Board, Spot
-from pieces import *
-import pieces
+import chess
+from math import inf as infinity
+from image import Image
+from board import Board
 
-#CONSTANTS
+
 WIDTH = 400
 HEIGHT = 400
-FONT = 'freesansbold.ttf'
 
-#IMAGES
-BOARD = pygame.image.load(os.path.abspath('imgs/board.png'))
+def chess_index(x, y):
+    i = x//50
+    j = 7 - y//50
+    return i, j
 
-#COLORS
-BLUE = pygame.Color('0x4363d8')
-DARK_BLUE = pygame.Color('0x000075')
-SOFT_BLUE = pygame.Color('0x46f0f0')
-BACK = pygame.Color('0xf58231')
-WHITE = pygame.Color('0xffffff')
-BLACK = pygame.Color('0x000000')
-
-def get_index_click():
-    x, y = pygame.mouse.get_pos()
+def click_index(x, y):
     i = x//50
     j = y//50
     return i, j
 
-def text(screen, size, text, bg, fg, cx, cy):
-	font = pygame.font.Font(FONT, size) 
-	text = font.render(text, True, fg, bg) 
-	textRect = text.get_rect()  
-	textRect.center = (cx, cy)
-	screen.blit(text, textRect)
+def render_selections(screen, image, start):
+    if start:
+        i, j = start
+        j = 7 - j
+        screen.blit(image.start, (i*50, j*50))
 
-def select_start(board, i, j, clean_moves, white_turn):
-    if board.spots[j][i].piece.is_white == white_turn:
-        start = board.spots[j][i]
-        start.dragging = True
-        start.selected_start = True
-        board.select_objectives(clean_moves, start)
-        return start
-    return None
+def game_over(white_turn):
+    if white_turn:
+        print('white wins')
+    else:
+        print('black wins')
+
+def minimax(depth, board, white_turn, alpha, beta):
+    if white_turn:
+        best = [None, +infinity]
+    else:
+        best = [None, -infinity]
+
+    if not depth:
+        score = board.evaluate_board()
+        return [None, score]
+    
+    moves = board.board.legal_moves
+    for move in moves:
+        board.board.push(move)
+        value = minimax(depth-1, board, not white_turn, alpha, beta)
+        board.board.pop()
+
+        if white_turn:
+            if value[1] < best[1]:
+                value[0] = move
+                best = value
+            beta = min(beta, value[1])
+            if beta <= alpha:
+               break
+        if not white_turn:
+            if value[1] > best[1]:
+                value[0] = move
+                best = value
+            alpha = max(alpha, value[1])
+            if beta <= alpha:
+                break
+    return best
 
 
 def game_loop(screen, white_turn):
-    board = Board()
-    #LOCAL VARIABLES
-    running = True
+    board = Board(screen)
+    image = Image()
+    _quit = False
     start = None
-    end = None
-    #COMPUTE POSIBLE MOVES
-    board.compute_moves(white_turn)
-    current_moves = board.clean_moves(board.get_moves(white_turn), white_turn)
+    game_over = False
     #LOOP
-    while running:
+    while not game_over and not _quit:
         #PROCESS EVENTS
         if white_turn:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
-
+                    _quit = True
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:
-                        i, j = get_index_click()
-                        start = select_start(board, i, j, current_moves, white_turn)
-
-                elif event.type == pygame.MOUSEBUTTONUP:
-                    if event.button == 1 and start:
-                        i, j = get_index_click()
-                        end = board.spots[j][i]
-                        start.reset_drag()
-                        if (start, end) in current_moves:
-                            board.make_move((start, end))
-                            board.compute_threads(white_turn)
-                            white_turn = not white_turn
-                            board.compute_moves(white_turn)
-                            current_moves = board.clean_moves(board.get_moves(white_turn), white_turn)
-                            if len(current_moves) == 0:
-                                running = False
+                    x, y = pygame.mouse.get_pos()
+                    i, j = chess_index(x, y)
+                    xC, yC = chess_index(x, y)
+                    if board.is_white((i, j)) and white_turn:
+                        start = i, j
+                    elif start and board.make_move(start, (i, j)):
+                        game_over = board.board.is_game_over()
+                        if game_over:
+                            game_over(white_turn)
                         start = None
-                        board.unselect_pieces()
-
-                elif event.type == pygame.MOUSEMOTION:
-                    if start:
-                        xC, yC = pygame.mouse.get_pos()
-                        start.imgX = xC - 25
-                        start.imgY = yC - 25
+                        white_turn = not white_turn
         else:
-            move = choice(current_moves)
-            board.make_move(move)
-            board.compute_threads(white_turn)
+            move = minimax(5, board, white_turn, -infinity, infinity)
+            board.board.push(move[0])
             white_turn = not white_turn
-            board.compute_moves(white_turn)
-            current_moves = board.clean_moves(board.get_moves(white_turn), white_turn)
-            if len(current_moves) == 0:
-                running = False
-
         #UPDATE VALUES AND CONDITIONS
 
         #DRAW
-        screen.fill(BLACK)
-        screen.blit(BOARD,(0, 0))
-        
-        board.draw_pieces(screen)
+        screen.fill(image.bg)
+        board.render_board()
+        render_selections(screen, image, start)
+        board.render_pieces()
         pygame.display.flip()
 
 def main():
+
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption('Chess')
