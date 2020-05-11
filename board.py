@@ -103,3 +103,9 @@ class Board:
     
     def render_board(self):
         self.screen.blit(self.image.board,(0, 0))
+
+    def render_selections(self, start):
+        if start:
+            i, j = start
+            j = 7 - j
+            self.screen.blit(self.image.start, (i*50, j*50))

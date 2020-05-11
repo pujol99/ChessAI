@@ -1,10 +1,8 @@
 import pygame
 import chess
-from math import inf as infinity
-from image import Image
 from board import Board
 
-
+INFINITY = 9999
 WIDTH = 400
 HEIGHT = 400
 
@@ -18,12 +16,6 @@ def click_index(x, y):
     j = y//50
     return i, j
 
-def render_selections(screen, image, start):
-    if start:
-        i, j = start
-        j = 7 - j
-        screen.blit(image.start, (i*50, j*50))
-
 def game_over(white_turn):
     if white_turn:
         print('white wins')
@@ -32,9 +24,9 @@ def game_over(white_turn):
 
 def minimax(depth, board, white_turn, alpha, beta):
     if white_turn:
-        best = [None, +infinity]
+        best = [None, +INFINITY]
     else:
-        best = [None, -infinity]
+        best = [None, -INFINITY]
 
     if not depth:
         score = board.evaluate_board()
@@ -65,17 +57,17 @@ def minimax(depth, board, white_turn, alpha, beta):
 
 def game_loop(screen, white_turn):
     board = Board(screen)
-    image = Image()
-    _quit = False
     start = None
     game_over = False
+
+    has_quit = False
     #LOOP
-    while not game_over and not _quit:
+    while not game_over and not has_quit:
         #PROCESS EVENTS
         if white_turn:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    _quit = True
+                    has_quit = True
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     x, y = pygame.mouse.get_pos()
                     i, j = chess_index(x, y)
@@ -84,20 +76,18 @@ def game_loop(screen, white_turn):
                         start = i, j
                     elif start and board.make_move(start, (i, j)):
                         game_over = board.board.is_game_over()
-                        if game_over:
-                            game_over(white_turn)
                         start = None
                         white_turn = not white_turn
         else:
-            move = minimax(5, board, white_turn, -infinity, infinity)
+            move = minimax(5, board, white_turn, -INFINITY, INFINITY)
             board.board.push(move[0])
             white_turn = not white_turn
-        #UPDATE VALUES AND CONDITIONS
+
+        
 
         #DRAW
-        screen.fill(image.bg)
         board.render_board()
-        render_selections(screen, image, start)
+        board.render_selections(start)
         board.render_pieces()
         pygame.display.flip()
 
